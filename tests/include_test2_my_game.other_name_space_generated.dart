@@ -57,7 +57,8 @@ class Unused {
   }
 
   UnusedT unpack() => UnusedT(
-      a: a);
+    a: a,
+  );
 
   static int pack(fb.Builder fbBuilder, UnusedT? object) {
     if (object == null) return 0;
@@ -69,7 +70,8 @@ class UnusedT implements fb.Packable {
   int a;
 
   UnusedT({
-      required this.a});
+    required this.a,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -150,7 +152,8 @@ class TableB {
   }
 
   TableBT unpack() => TableBT(
-      a: a?.unpack());
+    a: a?.unpack(),
+  );
 
   static int pack(fb.Builder fbBuilder, TableBT? object) {
     if (object == null) return 0;
@@ -162,7 +165,8 @@ class TableBT implements fb.Packable {
   TableAT? a;
 
   TableBT({
-      this.a});
+    this.a,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

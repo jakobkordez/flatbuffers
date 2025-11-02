@@ -605,8 +605,7 @@ class DartGenerator : public BaseGenerator {
       GenDocComment(field.doc_comment, "  ", code);
       code += "  " + type_name + " " + field_name + ";\n";
 
-      if (!constructor_args.empty()) constructor_args += ",\n";
-      constructor_args += "      ";
+      constructor_args += "    ";
       constructor_args += (struct_def.fixed ? "required " : "");
       constructor_args += "this." + field_name;
       if (!struct_def.fixed && !defaultValue.empty()) {
@@ -621,10 +620,11 @@ class DartGenerator : public BaseGenerator {
           constructor_args += " = " + defaultValue;
         }
       }
+      constructor_args += ",\n";
     }
 
     if (!constructor_args.empty()) {
-      code += "\n  " + object_type + "({\n" + constructor_args + "});\n\n";
+      code += "\n  " + object_type + "({\n" + constructor_args + "  });\n\n";
     }
 
     code += GenStructObjectAPIPack(struct_def, non_deprecated_fields);
@@ -645,8 +645,7 @@ class DartGenerator : public BaseGenerator {
       const FieldDef& field = *it->second;
 
       const std::string field_name = namer_.Field(field);
-      if (!constructor_args.empty()) constructor_args += ",\n";
-      constructor_args += "      " + field_name + ": ";
+      constructor_args += "    " + field_name + ": ";
 
       const Type& type = field.value.type;
       std::string defaultValue = getDefaultValue(field.value);
@@ -681,11 +680,12 @@ class DartGenerator : public BaseGenerator {
       } else {
         constructor_args += field_name;
       }
+      constructor_args += ",\n";
     }
 
     const std::string object_type = namer_.ObjectType(struct_def);
     std::string code = "  " + object_type + " unpack() => " + object_type + "(";
-    if (!constructor_args.empty()) code += "\n" + constructor_args;
+    if (!constructor_args.empty()) code += "\n" + constructor_args + "  ";
     code += ");\n";
     return code;
   }

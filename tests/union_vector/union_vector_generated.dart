@@ -133,7 +133,8 @@ class Attacker {
   }
 
   AttackerT unpack() => AttackerT(
-      swordAttackDamage: swordAttackDamage);
+    swordAttackDamage: swordAttackDamage,
+  );
 
   static int pack(fb.Builder fbBuilder, AttackerT? object) {
     if (object == null) return 0;
@@ -145,7 +146,8 @@ class AttackerT implements fb.Packable {
   int swordAttackDamage;
 
   AttackerT({
-      this.swordAttackDamage = 0});
+    this.swordAttackDamage = 0,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -228,7 +230,8 @@ class Rapunzel {
   }
 
   RapunzelT unpack() => RapunzelT(
-      hairLength: hairLength);
+    hairLength: hairLength,
+  );
 
   static int pack(fb.Builder fbBuilder, RapunzelT? object) {
     if (object == null) return 0;
@@ -240,7 +243,8 @@ class RapunzelT implements fb.Packable {
   int hairLength;
 
   RapunzelT({
-      required this.hairLength});
+    required this.hairLength,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -317,7 +321,8 @@ class BookReader {
   }
 
   BookReaderT unpack() => BookReaderT(
-      booksRead: booksRead);
+    booksRead: booksRead,
+  );
 
   static int pack(fb.Builder fbBuilder, BookReaderT? object) {
     if (object == null) return 0;
@@ -329,7 +334,8 @@ class BookReaderT implements fb.Packable {
   int booksRead;
 
   BookReaderT({
-      required this.booksRead});
+    required this.booksRead,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -406,7 +412,8 @@ class FallingTub {
   }
 
   FallingTubT unpack() => FallingTubT(
-      weight: weight);
+    weight: weight,
+  );
 
   static int pack(fb.Builder fbBuilder, FallingTubT? object) {
     if (object == null) return 0;
@@ -418,7 +425,8 @@ class FallingTubT implements fb.Packable {
   int weight;
 
   FallingTubT({
-      required this.weight});
+    required this.weight,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -499,7 +507,8 @@ class HandFan {
   }
 
   HandFanT unpack() => HandFanT(
-      length: length);
+    length: length,
+  );
 
   static int pack(fb.Builder fbBuilder, HandFanT? object) {
     if (object == null) return 0;
@@ -511,7 +520,8 @@ class HandFanT implements fb.Packable {
   int length;
 
   HandFanT({
-      this.length = 0});
+    this.length = 0,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -601,10 +611,11 @@ class Movie {
   }
 
   MovieT unpack() => MovieT(
-      mainCharacterType: mainCharacterType,
-      mainCharacter: mainCharacter is String ? mainCharacter : mainCharacter?.unpack(),
-      charactersType: charactersType?.toList(),
-      characters: characters?.map((e) => e is String ? e : e.unpack()).toList());
+    mainCharacterType: mainCharacterType,
+    mainCharacter: mainCharacter is String ? mainCharacter : mainCharacter?.unpack(),
+    charactersType: charactersType?.toList(),
+    characters: characters?.map((e) => e is String ? e : e.unpack()).toList(),
+  );
 
   static int pack(fb.Builder fbBuilder, MovieT? object) {
     if (object == null) return 0;
@@ -619,10 +630,11 @@ class MovieT implements fb.Packable {
   List<dynamic>? characters;
 
   MovieT({
-      this.mainCharacterType,
-      this.mainCharacter,
-      this.charactersType,
-      this.characters});
+    this.mainCharacterType,
+    this.mainCharacter,
+    this.charactersType,
+    this.characters,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

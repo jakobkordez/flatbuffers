@@ -27,7 +27,8 @@ class TableA {
   }
 
   TableAT unpack() => TableAT(
-      b: b?.unpack());
+    b: b?.unpack(),
+  );
 
   static int pack(fb.Builder fbBuilder, TableAT? object) {
     if (object == null) return 0;
@@ -39,7 +40,8 @@ class TableAT implements fb.Packable {
   my_game_other_name_space.TableBT? b;
 
   TableAT({
-      this.b});
+    this.b,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

@@ -62,10 +62,11 @@ class NestedStruct {
   }
 
   NestedStructT unpack() => NestedStructT(
-      a: a.toList(growable: false),
-      b: b,
-      c: c.toList(growable: false),
-      d: d.toList(growable: false));
+    a: a.toList(growable: false),
+    b: b,
+    c: c.toList(growable: false),
+    d: d.toList(growable: false),
+  );
 
   static int pack(fb.Builder fbBuilder, NestedStructT? object) {
     if (object == null) return 0;
@@ -80,10 +81,11 @@ class NestedStructT implements fb.Packable {
   List<int> d;
 
   NestedStructT({
-      required this.a,
-      required this.b,
-      required this.c,
-      required this.d});
+    required this.a,
+    required this.b,
+    required this.c,
+    required this.d,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -204,12 +206,13 @@ class ArrayStruct {
   }
 
   ArrayStructT unpack() => ArrayStructT(
-      a: a,
-      b: b.toList(growable: false),
-      c: c,
-      d: d.map((e) => e.unpack()).toList(growable: false),
-      e: e,
-      f: f.toList(growable: false));
+    a: a,
+    b: b.toList(growable: false),
+    c: c,
+    d: d.map((e) => e.unpack()).toList(growable: false),
+    e: e,
+    f: f.toList(growable: false),
+  );
 
   static int pack(fb.Builder fbBuilder, ArrayStructT? object) {
     if (object == null) return 0;
@@ -226,12 +229,13 @@ class ArrayStructT implements fb.Packable {
   List<int> f;
 
   ArrayStructT({
-      required this.a,
-      required this.b,
-      required this.c,
-      required this.d,
-      required this.e,
-      required this.f});
+    required this.a,
+    required this.b,
+    required this.c,
+    required this.d,
+    required this.e,
+    required this.f,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -366,7 +370,8 @@ class ArrayTable {
   }
 
   ArrayTableT unpack() => ArrayTableT(
-      a: a?.unpack());
+    a: a?.unpack(),
+  );
 
   static int pack(fb.Builder fbBuilder, ArrayTableT? object) {
     if (object == null) return 0;
@@ -378,7 +383,8 @@ class ArrayTableT implements fb.Packable {
   ArrayStructT? a;
 
   ArrayTableT({
-      this.a});
+    this.a,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

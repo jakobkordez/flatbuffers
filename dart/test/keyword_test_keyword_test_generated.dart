@@ -146,10 +146,11 @@ class KeywordsInTable {
   }
 
   KeywordsInTableT unpack() => KeywordsInTableT(
-      $is: $is,
-      private: private,
-      type: type,
-      $default: $default);
+    $is: $is,
+    private: private,
+    type: type,
+    $default: $default,
+  );
 
   static int pack(fb.Builder fbBuilder, KeywordsInTableT? object) {
     if (object == null) return 0;
@@ -164,10 +165,11 @@ class KeywordsInTableT implements fb.Packable {
   bool $default;
 
   KeywordsInTableT({
-      this.$is = Abc.$void,
-      this.private = Public.NONE,
-      this.type = 0,
-      this.$default = false});
+    this.$is = Abc.$void,
+    this.private = Public.NONE,
+    this.type = 0,
+    this.$default = false,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -282,8 +284,9 @@ class Table2 {
   }
 
   Table2T unpack() => Table2T(
-      typeType: typeType,
-      type: type is String ? type : type?.unpack());
+    typeType: typeType,
+    type: type is String ? type : type?.unpack(),
+  );
 
   static int pack(fb.Builder fbBuilder, Table2T? object) {
     if (object == null) return 0;
@@ -296,8 +299,9 @@ class Table2T implements fb.Packable {
   dynamic type;
 
   Table2T({
-      this.typeType,
-      this.type});
+    this.typeType,
+    this.type,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

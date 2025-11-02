@@ -36,16 +36,17 @@ class MonsterExtra {
   }
 
   MonsterExtraT unpack() => MonsterExtraT(
-      d0: d0,
-      d1: d1,
-      d2: d2,
-      d3: d3,
-      f0: f0,
-      f1: f1,
-      f2: f2,
-      f3: f3,
-      dvec: dvec?.toList(),
-      fvec: fvec?.toList());
+    d0: d0,
+    d1: d1,
+    d2: d2,
+    d3: d3,
+    f0: f0,
+    f1: f1,
+    f2: f2,
+    f3: f3,
+    dvec: dvec?.toList(),
+    fvec: fvec?.toList(),
+  );
 
   static int pack(fb.Builder fbBuilder, MonsterExtraT? object) {
     if (object == null) return 0;
@@ -66,16 +67,17 @@ class MonsterExtraT implements fb.Packable {
   List<double>? fvec;
 
   MonsterExtraT({
-      this.d0 = double.nan,
-      this.d1 = double.nan,
-      this.d2 = double.infinity,
-      this.d3 = double.negativeInfinity,
-      this.f0 = double.nan,
-      this.f1 = double.nan,
-      this.f2 = double.infinity,
-      this.f3 = double.negativeInfinity,
-      this.dvec,
-      this.fvec});
+    this.d0 = double.nan,
+    this.d1 = double.nan,
+    this.d2 = double.infinity,
+    this.d3 = double.negativeInfinity,
+    this.f0 = double.nan,
+    this.f1 = double.nan,
+    this.f2 = double.infinity,
+    this.f3 = double.negativeInfinity,
+    this.dvec,
+    this.fvec,
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
