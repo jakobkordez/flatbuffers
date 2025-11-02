@@ -211,6 +211,7 @@ class AttackerObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class Rapunzel {
   Rapunzel._(this._bc, this._bcOffset);
 
@@ -299,6 +300,7 @@ class RapunzelObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class BookReader {
   BookReader._(this._bc, this._bcOffset);
 
@@ -387,6 +389,7 @@ class BookReaderObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class FallingTub {
   FallingTub._(this._bc, this._bcOffset);
 
@@ -475,6 +478,7 @@ class FallingTubObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class HandFan {
   HandFan._(this._bc, this._bcOffset);
   factory HandFan(List<int> bytes) {
@@ -573,6 +577,7 @@ class HandFanObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class Movie {
   Movie._(this._bc, this._bcOffset);
   factory Movie(List<int> bytes) {
@@ -720,3 +725,4 @@ class MovieObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+

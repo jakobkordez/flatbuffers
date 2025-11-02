@@ -260,6 +260,7 @@ class KeywordsInTableObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class Table2 {
   Table2._(this._bc, this._bcOffset);
   factory Table2(List<int> bytes) {
@@ -373,3 +374,4 @@ class Table2ObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+

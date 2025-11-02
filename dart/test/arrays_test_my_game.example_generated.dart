@@ -182,6 +182,7 @@ class NestedStructObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class ArrayStruct {
   ArrayStruct._(this._bc, this._bcOffset);
 
@@ -344,6 +345,7 @@ class ArrayStructObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
 class ArrayTable {
   ArrayTable._(this._bc, this._bcOffset);
   factory ArrayTable(List<int> bytes) {
@@ -446,3 +448,4 @@ class ArrayTableObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
+
