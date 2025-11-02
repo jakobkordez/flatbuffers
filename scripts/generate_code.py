@@ -387,6 +387,7 @@ flatc(
     schema="arrays_test.fbs",
 )
 
+flatc(BASE_OPTS + DART_OPTS, prefix="../dart/test/", schema="arrays_test.fbs")
 
 flatc(
     BASE_OPTS + PYTHON_OPTS,

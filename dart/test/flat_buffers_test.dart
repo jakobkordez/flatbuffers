@@ -11,6 +11,7 @@ import './monster_test_my_game.example2_generated.dart' as example2;
 import './monster_test_my_game.example_generated.dart' as example;
 import 'enums_generated.dart' as example3;
 import 'union_vector_generated.dart' as example5;
+import 'arrays_test_my_game.example_generated.dart' as example6;
 
 main() {
   defineReflectiveSuite(() {
@@ -20,6 +21,7 @@ main() {
     defineReflectiveTests(GeneratorTest);
     defineReflectiveTests(ListOfEnumsTest);
     defineReflectiveTests(UnionVectorTest);
+    defineReflectiveTests(ArraysTest);
   });
 }
 
@@ -1008,6 +1010,136 @@ class UnionVectorTest {
 
     final movie9 = movie8.unpack();
     expect(movie9.toString(), movie7.toString());
+  }
+}
+
+@reflectiveTest
+class ArraysTest {
+  void test_arrays_builder() {
+    final fbb = Builder();
+    final table1 = example6.ArrayTableBuilder(fbb)
+      ..begin()
+      ..addA(
+        example6.ArrayStructBuilder(fbb).finish(
+          1.25,
+          [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+          5,
+          [
+            () => example6.NestedStructBuilder(fbb).finish(
+                  [6000, 7000],
+                  example6.TestEnum.A,
+                  [example6.TestEnum.B, example6.TestEnum.C],
+                  [800000000000, 9000000000000],
+                ),
+            () => example6.NestedStructBuilder(fbb).finish(
+                  [7001, 6002],
+                  example6.TestEnum.B,
+                  [example6.TestEnum.B, example6.TestEnum.A],
+                  [-3, -4],
+                ),
+          ],
+          -76,
+          [9876543210, -1234567890],
+        ),
+      );
+    fbb.finish(table1.finish());
+
+    final table2 = example6.ArrayTable(fbb.buffer);
+
+    expect(table2.a!.a, 1.25);
+    expect(table2.a!.b, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+    expect(table2.a!.c, 5);
+    expect(table2.a!.d[0].a, [6000, 7000]);
+    expect(table2.a!.d[0].b, example6.TestEnum.A);
+    expect(table2.a!.d[0].c, [example6.TestEnum.B, example6.TestEnum.C]);
+    expect(table2.a!.d[0].d, [800000000000, 9000000000000]);
+    expect(table2.a!.d[1].a, [7001, 6002]);
+    expect(table2.a!.d[1].b, example6.TestEnum.B);
+    expect(table2.a!.d[1].c, [example6.TestEnum.B, example6.TestEnum.A]);
+    expect(table2.a!.d[1].d, [-3, -4]);
+    expect(table2.a!.e, -76);
+    expect(table2.a!.f, [9876543210, -1234567890]);
+  }
+
+  void test_arrays_object_builder() {
+    final table1 = example6.ArrayTableObjectBuilder(
+      a: example6.ArrayStructObjectBuilder(
+        a: 1.25,
+        b: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        c: 5,
+        d: [
+          example6.NestedStructObjectBuilder(
+            a: [6000, 7000],
+            b: example6.TestEnum.A,
+            c: [example6.TestEnum.B, example6.TestEnum.C],
+            d: [800000000000, 9000000000000],
+          ),
+          example6.NestedStructObjectBuilder(
+            a: [7001, 6002],
+            b: example6.TestEnum.B,
+            c: [example6.TestEnum.B, example6.TestEnum.A],
+            d: [-3, -4],
+          )
+        ],
+        e: -76,
+        f: [9876543210, -1234567890],
+      ),
+    );
+
+    final table2 = example6.ArrayTable(table1.toBytes());
+
+    expect(table2.a!.a, 1.25);
+    expect(table2.a!.b, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+    expect(table2.a!.c, 5);
+    expect(table2.a!.d[0].a, [6000, 7000]);
+    expect(table2.a!.d[0].b, example6.TestEnum.A);
+    expect(table2.a!.d[0].c, [example6.TestEnum.B, example6.TestEnum.C]);
+    expect(table2.a!.d[0].d, [800000000000, 9000000000000]);
+    expect(table2.a!.d[1].a, [7001, 6002]);
+    expect(table2.a!.d[1].b, example6.TestEnum.B);
+    expect(table2.a!.d[1].c, [example6.TestEnum.B, example6.TestEnum.A]);
+    expect(table2.a!.d[1].d, [-3, -4]);
+    expect(table2.a!.e, -76);
+    expect(table2.a!.f, [9876543210, -1234567890]);
+  }
+
+  void test_arrays_object_api() {
+    final table1 = example6.ArrayTableT(
+      a: example6.ArrayStructT(
+        a: 1.25,
+        b: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        c: 5,
+        d: [
+          example6.NestedStructT(
+            a: [6000, 7000],
+            b: example6.TestEnum.A,
+            c: [example6.TestEnum.B, example6.TestEnum.C],
+            d: [800000000000, 9000000000000],
+          ),
+          example6.NestedStructT(
+            a: [7001, 6002],
+            b: example6.TestEnum.B,
+            c: [example6.TestEnum.B, example6.TestEnum.A],
+            d: [-3, -4],
+          )
+        ],
+        e: -76,
+        f: [9876543210, -1234567890],
+      ),
+    );
+
+    final fbb = Builder();
+    fbb.finish(table1.pack(fbb));
+
+    final table2 = example6.ArrayTable(fbb.buffer);
+    expect(
+      table2.toString().replaceAllMapped(
+          RegExp('([a-zA-Z0-9]+){'), (match) => match.group(1)! + 'T{'),
+      table1.toString(),
+    );
+
+    final table3 = table2.unpack();
+    expect(table3.toString(), table1.toString());
   }
 }
 

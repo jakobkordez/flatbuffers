@@ -1058,6 +1058,39 @@ class UnionListReader<E> extends Reader<List<E?>> {
   }
 }
 
+/// Reader of arrays
+class ArrayReader<E> extends Reader<List<E>> {
+  final int _length;
+  final Reader<E> _elementReader;
+
+  /// Enables lazy reading of the list
+  ///
+  /// If true, the returned unmodifiable list lazily reads objects on access.
+  /// Therefore, the underlying buffer must not change while accessing the list.
+  ///
+  /// If false, reads the whole list immediately on access.
+  final bool lazy;
+
+  const ArrayReader(this._elementReader, this._length, {this.lazy = true});
+
+  @override
+  int get size => _elementReader.size * _length;
+
+  @override
+  List<E> read(BufferContext bc, int offset) {
+    return lazy
+        ? _FbArray<E>(_elementReader, _length, bc, offset)
+        : List<E>.generate(
+            _length,
+            (int index) => _elementReader.read(
+              bc,
+              offset + _elementReader.size * index,
+            ),
+            growable: false,
+          );
+  }
+}
+
 /// Object that can read a value at a [BufferContext].
 abstract class Reader<T> {
   const Reader();
@@ -1387,6 +1420,38 @@ class _FbUnionList<E> extends _FbList<E?> {
     }
     return item!;
   }
+}
+
+/// The base class for fixed-sized arrays
+class _FbArray<E> with ListMixin<E> implements List<E> {
+  final BufferContext bc;
+  final int offset;
+  final Reader<E> elementReader;
+  @override
+  final int length;
+
+  List<E?>? _items;
+
+  _FbArray(this.elementReader, this.length, this.bc, this.offset);
+
+  @override
+  @pragma('vm:prefer-inline')
+  E operator [](int i) {
+    _items ??= List<E?>.filled(length, null);
+    var item = _items![i];
+    if (item == null) {
+      item = elementReader.read(bc, offset + elementReader.size * i);
+      _items![i] = item;
+    }
+    return item!;
+  }
+
+  @override
+  set length(int i) => throw StateError('Attempt to modify immutable list');
+
+  @override
+  void operator []=(int i, E e) =>
+      throw StateError('Attempt to modify immutable list');
 }
 
 /// The base class for immutable lists read from flat buffers.

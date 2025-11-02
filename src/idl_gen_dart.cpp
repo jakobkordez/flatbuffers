@@ -395,7 +395,14 @@ class DartGenerator : public BaseGenerator {
                                 bool parent_is_vector = false, bool lazy = true,
                                 bool constConstruct = true) {
     std::string prefix = (constConstruct ? "const " : "") + _kFb;
-    if (IsVector(type)) {
+    if (IsArray(type)) {
+      return prefix + ".ArrayReader<" +
+             GenDartTypeName(type.VectorType(), current_namespace, def) + ">(" +
+             GenReaderTypeName(type.VectorType(), current_namespace, def, true,
+                               true, false) +
+             ", " + NumToString(type.fixed_length) +
+             (lazy ? ")" : ", lazy: false)");
+    } else if (IsVector(type)) {
       std::string code = prefix + ".";
       if (type.VectorType().base_type == BASE_TYPE_UNION) {
         code = _kFb + ".UnionListReader";
@@ -428,7 +435,7 @@ class DartGenerator : public BaseGenerator {
   std::string GenDartTypeName(const Type& type, Namespace* current_namespace,
                               const FieldDef& def,
                               std::string struct_type_suffix = "") {
-    if (IsVector(type)) {
+    if (IsVector(type) || IsArray(type)) {
       return "List<" +
              GenDartTypeName(type.VectorType(), current_namespace, def,
                              struct_type_suffix) +
@@ -665,6 +672,12 @@ class DartGenerator : public BaseGenerator {
           constructor_args += "e.unpack())";
         }
         constructor_args += ".toList()";
+      } else if (type.base_type == BASE_TYPE_ARRAY) {
+        constructor_args += field_name;
+        if (type.struct_def) {
+          constructor_args += ".map((e) => e.unpack())";
+        }
+        constructor_args += ".toList(growable: false)";
       } else {
         constructor_args += field_name;
       }
@@ -748,7 +761,8 @@ class DartGenerator : public BaseGenerator {
                 NumToString(field.value.offset) + ");\n";
       } else {
         if (field.value.type.enum_def &&
-            field.value.type.base_type != BASE_TYPE_VECTOR) {
+            field.value.type.base_type != BASE_TYPE_VECTOR &&
+            field.value.type.base_type != BASE_TYPE_ARRAY) {
           code += GenDartTypeName(field.value.type,
                                   struct_def.defined_namespace, field) +
                   (isNullable ? "._createOrNull(" : ".fromValue(");
@@ -769,7 +783,8 @@ class DartGenerator : public BaseGenerator {
           }
         }
         if (field.value.type.enum_def &&
-            field.value.type.base_type != BASE_TYPE_VECTOR) {
+            field.value.type.base_type != BASE_TYPE_VECTOR &&
+            field.value.type.base_type != BASE_TYPE_ARRAY) {
           code += ")";
         }
         code += ";\n";
@@ -885,13 +900,23 @@ class DartGenerator : public BaseGenerator {
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
       const std::string field_name = namer_.Field(field);
+      Type type = field.value.type;
+      bool is_array = IsArray(type);
 
-      if (IsStruct(field.value.type)) {
-        code += "fb.StructBuilder";
-      } else {
-        code += GenDartTypeName(field.value.type, struct_def.defined_namespace,
-                                field);
+      if (is_array) {
+        code += "List<";
+        type = type.VectorType();
+        is_array = true;
       }
+      if (IsStruct(type)) {
+        code += _kFb + ".StructBuilder";
+      } else {
+        code += GenDartTypeName(type, struct_def.defined_namespace, field);
+      }
+      if (is_array) {
+        code += ">";
+      }
+
       code += " " + field_name;
       if (it != non_deprecated_fields.end() - 1) {
         code += ", ";
@@ -899,27 +924,8 @@ class DartGenerator : public BaseGenerator {
     }
     code += ") {\n";
 
-    for (auto it = non_deprecated_fields.rbegin();
-         it != non_deprecated_fields.rend(); ++it) {
-      const FieldDef& field = *it->second;
-      const std::string field_name = namer_.Field(field);
+    code += StructObjectBuilderBody(non_deprecated_fields, false, false, true);
 
-      if (field.padding) {
-        code += "    fbBuilder.pad(" + NumToString(field.padding) + ");\n";
-      }
-
-      if (IsStruct(field.value.type)) {
-        code += "    " + field_name + "();\n";
-      } else {
-        code += "    fbBuilder.put" + GenType(field.value.type) + "(";
-        code += field_name;
-        if (field.value.type.enum_def) {
-          code += ".value";
-        }
-        code += ");\n";
-      }
-    }
-    code += "    return fbBuilder.offset;\n";
     code += "  }\n\n";
   }
 
@@ -1042,7 +1048,8 @@ class DartGenerator : public BaseGenerator {
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
 
-      if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type))
+      if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type) ||
+          IsArray(field.value.type))
         continue;
 
       std::string offset_name = namer_.Variable(field) + "Offset";
@@ -1122,34 +1129,43 @@ class DartGenerator : public BaseGenerator {
 
   std::string StructObjectBuilderBody(
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields,
-      bool prependUnderscore = true, bool pack = false) {
+      bool prependUnderscore = true, bool pack = false,
+      bool is_struct_builder = false) {
     std::string code;
 
     for (auto it = non_deprecated_fields.rbegin();
          it != non_deprecated_fields.rend(); ++it) {
       const FieldDef& field = *it->second;
-      const std::string field_name = namer_.Field(field);
+      std::string field_name =
+          (prependUnderscore ? "_" : "") + namer_.Field(field);
+      Type type = field.value.type;
+      bool is_array = IsArray(type);
 
       if (field.padding) {
         code += "    fbBuilder.pad(" + NumToString(field.padding) + ");\n";
       }
 
-      if (IsStruct(field.value.type)) {
-        code += "    ";
-        if (prependUnderscore) {
-          code += "_";
-        }
-        code += field_name + (pack ? ".pack" : ".finish") + "(fbBuilder);\n";
-      } else {
-        code += "    fbBuilder.put" + GenType(field.value.type) + "(";
-        if (prependUnderscore) {
-          code += "_";
-        }
-        code += field_name;
-        if (field.value.type.enum_def) {
+      if (is_array) {
+        code += "    for (int _idx = " + NumToString(type.fixed_length) +
+                "; _idx > 0; --_idx) {\n  ";
+        type = type.VectorType();
+        field_name += "[_idx-1]";
+      }
+      code += "    ";
+      if (!IsStruct(type)) {
+        code += "fbBuilder.put" + GenType(type) + "(" + field_name;
+        if (type.enum_def) {
           code += ".value";
         }
         code += ");\n";
+      } else if (is_struct_builder) {
+        code += field_name + "();\n";
+      } else {
+        code +=
+            field_name + "." + (pack ? "pack" : "finish") + "(fbBuilder);\n";
+      }
+      if (is_array) {
+        code += "    }\n";
       }
     }
 
