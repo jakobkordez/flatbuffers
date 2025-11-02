@@ -24,9 +24,6 @@ enum Abc {
     }
   }
 
-  static Abc? _createOrNull(int? value) =>
-      value == null ? null : Abc.fromValue(value);
-
   static const int minValue = 0;
   static const int maxValue = 2;
   static const fb.Reader<Abc> reader = _AbcReader();
@@ -55,9 +52,6 @@ enum Public {
       default: throw StateError('Invalid value $value for bit flag enum');
     }
   }
-
-  static Public? _createOrNull(int? value) =>
-      value == null ? null : Public.fromValue(value);
 
   static const int minValue = 0;
   static const int maxValue = 0;
@@ -91,9 +85,6 @@ enum KeywordsInUnionTypeId {
       default: throw StateError('Invalid value $value for bit flag enum');
     }
   }
-
-  static KeywordsInUnionTypeId? _createOrNull(int? value) =>
-      value == null ? null : KeywordsInUnionTypeId.fromValue(value);
 
   static const int minValue = 0;
   static const int maxValue = 2;
@@ -135,8 +126,8 @@ class KeywordsInTable {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  Abc get $is => Abc.fromValue(const fb.Int32Reader().vTableGet(_bc, _bcOffset, 4, 0));
-  Public get private => Public.fromValue(const fb.Int32Reader().vTableGet(_bc, _bcOffset, 6, 0));
+  Abc get $is => Abc.reader.vTableGet(_bc, _bcOffset, 4, Abc.$void);
+  Public get private => Public.reader.vTableGet(_bc, _bcOffset, 6, Public.NONE);
   int get type => const fb.Int32Reader().vTableGet(_bc, _bcOffset, 8, 0);
   bool get $default => const fb.BoolReader().vTableGet(_bc, _bcOffset, 10, false);
 
@@ -275,7 +266,7 @@ class Table2 {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  KeywordsInUnionTypeId? get typeType => KeywordsInUnionTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 4));
+  KeywordsInUnionTypeId? get typeType => KeywordsInUnionTypeId.reader.vTableGetNullable(_bc, _bcOffset, 4);
   dynamic get type => _KeywordsInUnionReader(typeType).vTableGetNullable(_bc, _bcOffset, 6);
 
   @override

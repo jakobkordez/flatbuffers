@@ -22,9 +22,6 @@ enum FromInclude {
     }
   }
 
-  static FromInclude? _createOrNull(int? value) =>
-      value == null ? null : FromInclude.fromValue(value);
-
   static const int minValue = 0;
   static const int maxValue = 0;
   static const fb.Reader<FromInclude> reader = _FromIncludeReader();

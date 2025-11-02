@@ -258,10 +258,6 @@ class DartGenerator : public BaseGenerator {
     code += "    }\n";
     code += "  }\n\n";
 
-    code += "  static " + enum_type + "? _createOrNull(int? value) =>\n";
-    code +=
-        "      value == null ? null : " + enum_type + ".fromValue(value);\n\n";
-
     // This is meaningless for bit_flags, however, note that unlike "regular"
     // dart enums this enum can still have holes.
     if (!is_bit_flags) {
@@ -419,10 +415,7 @@ class DartGenerator : public BaseGenerator {
       return prefix + ".BoolReader()";
     } else if (IsString(type)) {
       return prefix + ".StringReader()";
-    } else if (IsScalar(type.base_type)) {
-      if (type.enum_def && parent_is_vector) {
-        return GenDartTypeName(type, current_namespace, def) + ".reader";
-      }
+    } else if (IsScalar(type.base_type) && !type.enum_def) {
       return prefix + "." + GenType(type) + "Reader()";
     } else {
       return GenDartTypeName(type, current_namespace, def) + ".reader";
@@ -606,16 +599,7 @@ class DartGenerator : public BaseGenerator {
       constructor_args += (struct_def.fixed ? "required " : "");
       constructor_args += "this." + field_name;
       if (!struct_def.fixed && !defaultValue.empty()) {
-        if (IsEnum(field.value.type)) {
-          auto& enum_def = *field.value.type.enum_def;
-          if (auto val = enum_def.FindByValue(defaultValue)) {
-            constructor_args += " = " + namer_.EnumVariant(enum_def, *val);
-          } else {
-            constructor_args += " = " + namer_.Type(enum_def) + "._default";
-          }
-        } else {
-          constructor_args += " = " + defaultValue;
-        }
+        constructor_args += " = " + defaultValue;
       }
       constructor_args += ",\n";
     }
@@ -757,14 +741,6 @@ class DartGenerator : public BaseGenerator {
                 "Type).vTableGetNullable(_bc, _bcOffset, " +
                 NumToString(field.value.offset) + ");\n";
       } else {
-        if (field.value.type.enum_def &&
-            field.value.type.base_type != BASE_TYPE_VECTOR &&
-            field.value.type.base_type != BASE_TYPE_ARRAY) {
-          code += GenDartTypeName(field.value.type,
-                                  struct_def.defined_namespace, field) +
-                  (isNullable ? "._createOrNull(" : ".fromValue(");
-        }
-
         code += GenReaderTypeName(field.value.type,
                                   struct_def.defined_namespace, field);
         if (struct_def.fixed) {
@@ -778,11 +754,6 @@ class DartGenerator : public BaseGenerator {
           } else {
             code += "(_bc, _bcOffset, " + offset + ", " + defaultValue + ")";
           }
-        }
-        if (field.value.type.enum_def &&
-            field.value.type.base_type != BASE_TYPE_VECTOR &&
-            field.value.type.base_type != BASE_TYPE_ARRAY) {
-          code += ")";
         }
         code += ";\n";
       }
@@ -820,7 +791,14 @@ class DartGenerator : public BaseGenerator {
   }
 
   std::string getDefaultValue(const Value& value) const {
-    if (!value.constant.empty() && value.constant != "0") {
+    if (IsEnum(value.type) && !IsUnion(value.type)) {
+      auto& enum_def = *value.type.enum_def;
+      if (auto val = enum_def.FindByValue(value.constant)) {
+        return namer_.EnumVariant(enum_def, *val);
+      } else {
+        return namer_.Type(enum_def) + "._default";
+      }
+    } else if (!value.constant.empty() && value.constant != "0") {
       if (IsBool(value.type.base_type)) {
         return "true";
       }

@@ -36,9 +36,6 @@ enum Color {
     }
   }
 
-  static Color? _createOrNull(int? value) =>
-      value == null ? null : Color.fromValue(value);
-
   static const fb.Reader<Color> reader = _ColorReader();
 }
 
@@ -76,9 +73,6 @@ enum Race {
         throw StateError('Invalid value $value for bit flag enum');
     }
   }
-
-  static Race? _createOrNull(int? value) =>
-      value == null ? null : Race.fromValue(value);
 
   static const int minValue = -1;
   static const int maxValue = 2;
@@ -120,9 +114,6 @@ enum LongEnum {
     }
   }
 
-  static LongEnum? _createOrNull(int? value) =>
-      value == null ? null : LongEnum.fromValue(value);
-
   static const fb.Reader<LongEnum> reader = _LongEnumReader();
 }
 
@@ -160,9 +151,6 @@ enum AnyTypeId {
         throw StateError('Invalid value $value for bit flag enum');
     }
   }
-
-  static AnyTypeId? _createOrNull(int? value) =>
-      value == null ? null : AnyTypeId.fromValue(value);
 
   static const int minValue = 0;
   static const int maxValue = 3;
@@ -221,9 +209,6 @@ enum AnyUniqueAliasesTypeId {
     }
   }
 
-  static AnyUniqueAliasesTypeId? _createOrNull(int? value) =>
-      value == null ? null : AnyUniqueAliasesTypeId.fromValue(value);
-
   static const int minValue = 0;
   static const int maxValue = 3;
   static const fb.Reader<AnyUniqueAliasesTypeId> reader =
@@ -281,9 +266,6 @@ enum AnyAmbiguousAliasesTypeId {
         throw StateError('Invalid value $value for bit flag enum');
     }
   }
-
-  static AnyAmbiguousAliasesTypeId? _createOrNull(int? value) =>
-      value == null ? null : AnyAmbiguousAliasesTypeId.fromValue(value);
 
   static const int minValue = 0;
   static const int maxValue = 3;
@@ -427,8 +409,7 @@ class TestSimpleTableWithEnum {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  Color get color =>
-      Color.fromValue(const fb.Uint8Reader().vTableGet(_bc, _bcOffset, 4, 2));
+  Color get color => Color.reader.vTableGet(_bc, _bcOffset, 4, Color.Green);
 
   @override
   String toString() {
@@ -523,8 +504,7 @@ class Vec3 {
   double get y => const fb.Float32Reader().read(_bc, _bcOffset + 4);
   double get z => const fb.Float32Reader().read(_bc, _bcOffset + 8);
   double get test1 => const fb.Float64Reader().read(_bc, _bcOffset + 16);
-  Color get test2 =>
-      Color.fromValue(const fb.Uint8Reader().read(_bc, _bcOffset + 24));
+  Color get test2 => Color.reader.read(_bc, _bcOffset + 24);
   Test get test3 => Test.reader.read(_bc, _bcOffset + 26);
 
   @override
@@ -1180,11 +1160,8 @@ class Monster {
       const fb.StringReader().vTableGetNullable(_bc, _bcOffset, 10);
   List<int>? get inventory =>
       const fb.ListReader(fb.Uint8Reader()).vTableGetNullable(_bc, _bcOffset, 14);
-  Color get color =>
-      Color.fromValue(const fb.Uint8Reader().vTableGet(_bc, _bcOffset, 16, 8));
-  AnyTypeId? get testType => AnyTypeId._createOrNull(
-    const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 18),
-  );
+  Color get color => Color.reader.vTableGet(_bc, _bcOffset, 16, Color.Blue);
+  AnyTypeId? get testType => AnyTypeId.reader.vTableGetNullable(_bc, _bcOffset, 18);
   dynamic get test => _AnyReader(testType).vTableGetNullable(_bc, _bcOffset, 20);
   List<Test>? get test4 => const fb.ListReader(
     Test.reader,
@@ -1270,32 +1247,21 @@ class Monster {
   List<int>? get vectorOfNonOwningReferences => const fb.ListReader(
     fb.Uint64Reader(),
   ).vTableGetNullable(_bc, _bcOffset, 88);
-  AnyUniqueAliasesTypeId? get anyUniqueType =>
-      AnyUniqueAliasesTypeId._createOrNull(
-        const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 90),
-      );
+  AnyUniqueAliasesTypeId? get anyUniqueType => AnyUniqueAliasesTypeId.reader.vTableGetNullable(_bc, _bcOffset, 90);
   dynamic get anyUnique => _AnyUniqueAliasesReader(anyUniqueType).vTableGetNullable(_bc, _bcOffset, 92);
-  AnyAmbiguousAliasesTypeId? get anyAmbiguousType =>
-      AnyAmbiguousAliasesTypeId._createOrNull(
-        const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 94),
-      );
+  AnyAmbiguousAliasesTypeId? get anyAmbiguousType => AnyAmbiguousAliasesTypeId.reader.vTableGetNullable(_bc, _bcOffset, 94);
   dynamic get anyAmbiguous => _AnyAmbiguousAliasesReader(anyAmbiguousType).vTableGetNullable(_bc, _bcOffset, 96);
   List<Color>? get vectorOfEnums => const fb.ListReader(
     Color.reader,
   ).vTableGetNullable(_bc, _bcOffset, 98);
-  Race get signedEnum =>
-      Race.fromValue(const fb.Int8Reader().vTableGet(_bc, _bcOffset, 100, -1));
-  List<int>? get testrequirednestedflatbuffer => const fb.ListReader(fb.Uint8Reader(),).vTableGetNullable(_bc, _bcOffset, 102);
+  Race get signedEnum => Race.reader.vTableGet(_bc, _bcOffset, 100, Race.None);
+  List<int>? get testrequirednestedflatbuffer => const fb.ListReader(fb.Uint8Reader()).vTableGetNullable(_bc, _bcOffset, 102);
   List<Stat>? get scalarKeySortedTables => const fb.ListReader(
     Stat.reader,
   ).vTableGetNullable(_bc, _bcOffset, 104);
   Test? get nativeInline => Test.reader.vTableGetNullable(_bc, _bcOffset, 106);
-  LongEnum get longEnumNonEnumDefault => LongEnum.fromValue(
-    const fb.Uint64Reader().vTableGet(_bc, _bcOffset, 108, 0),
-  );
-  LongEnum get longEnumNormalDefault => LongEnum.fromValue(
-    const fb.Uint64Reader().vTableGet(_bc, _bcOffset, 110, 2),
-  );
+  LongEnum get longEnumNonEnumDefault => LongEnum.reader.vTableGet(_bc, _bcOffset, 108, LongEnum._default);
+  LongEnum get longEnumNormalDefault => LongEnum.reader.vTableGet(_bc, _bcOffset, 110, LongEnum.LongOne);
   double get nanDefault =>
       const fb.Float32Reader().vTableGet(_bc, _bcOffset, 112, double.nan);
   double get infDefault =>

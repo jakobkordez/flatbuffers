@@ -30,9 +30,6 @@ enum CharacterTypeId {
     }
   }
 
-  static CharacterTypeId? _createOrNull(int? value) =>
-      value == null ? null : CharacterTypeId.fromValue(value);
-
   static const int minValue = 0;
   static const int maxValue = 6;
   static const fb.Reader<CharacterTypeId> reader = _CharacterTypeIdReader();
@@ -81,9 +78,6 @@ enum GadgetTypeId {
       default: throw StateError('Invalid value $value for bit flag enum');
     }
   }
-
-  static GadgetTypeId? _createOrNull(int? value) =>
-      value == null ? null : GadgetTypeId.fromValue(value);
 
   static const int minValue = 0;
   static const int maxValue = 2;
@@ -597,7 +591,7 @@ class Movie {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  CharacterTypeId? get mainCharacterType => CharacterTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 4));
+  CharacterTypeId? get mainCharacterType => CharacterTypeId.reader.vTableGetNullable(_bc, _bcOffset, 4);
   dynamic get mainCharacter => _CharacterReader(mainCharacterType).vTableGetNullable(_bc, _bcOffset, 6);
   List<CharacterTypeId>? get charactersType => const fb.ListReader(CharacterTypeId.reader).vTableGetNullable(_bc, _bcOffset, 8);
   List<dynamic>? get characters => fb.UnionListReader((index) => _CharacterReader(charactersType?[index])).vTableGetNullable(_bc, _bcOffset, 10);
