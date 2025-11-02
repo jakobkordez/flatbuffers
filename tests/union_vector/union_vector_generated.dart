@@ -599,7 +599,7 @@ class Movie {
 
   CharacterTypeId? get mainCharacterType => CharacterTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 4));
   dynamic get mainCharacter => _CharacterReader(mainCharacterType).vTableGetNullable(_bc, _bcOffset, 6);
-  List<CharacterTypeId>? get charactersType => const fb.ListReader<CharacterTypeId>(CharacterTypeId.reader).vTableGetNullable(_bc, _bcOffset, 8);
+  List<CharacterTypeId>? get charactersType => const fb.ListReader(CharacterTypeId.reader).vTableGetNullable(_bc, _bcOffset, 8);
   List<dynamic>? get characters => fb.UnionListReader((index) => _CharacterReader(charactersType?[index])).vTableGetNullable(_bc, _bcOffset, 10);
 
   @override

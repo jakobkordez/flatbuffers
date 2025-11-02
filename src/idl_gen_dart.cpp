@@ -396,8 +396,7 @@ class DartGenerator : public BaseGenerator {
                                 bool constConstruct = true) {
     std::string prefix = (constConstruct ? "const " : "") + _kFb;
     if (IsArray(type)) {
-      return prefix + ".ArrayReader<" +
-             GenDartTypeName(type.VectorType(), current_namespace, def) + ">(" +
+      return prefix + ".ArrayReader(" +
              GenReaderTypeName(type.VectorType(), current_namespace, def, true,
                                true, false) +
              ", " + NumToString(type.fixed_length) +
@@ -407,9 +406,7 @@ class DartGenerator : public BaseGenerator {
       if (type.VectorType().base_type == BASE_TYPE_UNION) {
         code = _kFb + ".UnionListReader";
       } else {
-        code += "ListReader<" +
-                GenDartTypeName(type.VectorType(), current_namespace, def) +
-                ">";
+        code += "ListReader";
       }
       code += "(" + GenReaderTypeName(type.VectorType(), current_namespace, def,
                                       true, true, false);

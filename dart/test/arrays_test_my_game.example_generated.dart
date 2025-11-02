@@ -51,10 +51,10 @@ class NestedStruct {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  List<int> get a => const fb.ArrayReader<int>(fb.Int32Reader(), 2).read(_bc, _bcOffset + 0);
+  List<int> get a => const fb.ArrayReader(fb.Int32Reader(), 2).read(_bc, _bcOffset + 0);
   TestEnum get b => TestEnum.fromValue(const fb.Int8Reader().read(_bc, _bcOffset + 8));
-  List<TestEnum> get c => const fb.ArrayReader<TestEnum>(TestEnum.reader, 2).read(_bc, _bcOffset + 9);
-  List<int> get d => const fb.ArrayReader<int>(fb.Int64Reader(), 2).read(_bc, _bcOffset + 16);
+  List<TestEnum> get c => const fb.ArrayReader(TestEnum.reader, 2).read(_bc, _bcOffset + 9);
+  List<int> get d => const fb.ArrayReader(fb.Int64Reader(), 2).read(_bc, _bcOffset + 16);
 
   @override
   String toString() {
@@ -193,11 +193,11 @@ class ArrayStruct {
   final int _bcOffset;
 
   double get a => const fb.Float32Reader().read(_bc, _bcOffset + 0);
-  List<int> get b => const fb.ArrayReader<int>(fb.Int32Reader(), 15).read(_bc, _bcOffset + 4);
+  List<int> get b => const fb.ArrayReader(fb.Int32Reader(), 15).read(_bc, _bcOffset + 4);
   int get c => const fb.Int8Reader().read(_bc, _bcOffset + 64);
-  List<NestedStruct> get d => const fb.ArrayReader<NestedStruct>(NestedStruct.reader, 2).read(_bc, _bcOffset + 72);
+  List<NestedStruct> get d => const fb.ArrayReader(NestedStruct.reader, 2).read(_bc, _bcOffset + 72);
   int get e => const fb.Int32Reader().read(_bc, _bcOffset + 136);
-  List<int> get f => const fb.ArrayReader<int>(fb.Int64Reader(), 2).read(_bc, _bcOffset + 144);
+  List<int> get f => const fb.ArrayReader(fb.Int64Reader(), 2).read(_bc, _bcOffset + 144);
 
   @override
   String toString() {
