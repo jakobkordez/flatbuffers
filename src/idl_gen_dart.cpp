@@ -926,7 +926,7 @@ class DartGenerator : public BaseGenerator {
 
     code += StructObjectBuilderBody(non_deprecated_fields, false, false, true);
 
-    code += "  }\n\n";
+    code += "  }\n";
   }
 
   void TableBuilderBody(

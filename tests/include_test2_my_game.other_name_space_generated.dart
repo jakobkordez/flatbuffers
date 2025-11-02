@@ -105,7 +105,6 @@ class UnusedBuilder {
     fbBuilder.putInt32(a);
     return fbBuilder.offset;
   }
-
 }
 
 class UnusedObjectBuilder extends fb.ObjectBuilder {

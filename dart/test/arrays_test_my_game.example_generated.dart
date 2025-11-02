@@ -139,7 +139,6 @@ class NestedStructBuilder {
     }
     return fbBuilder.offset;
   }
-
 }
 
 class NestedStructObjectBuilder extends fb.ObjectBuilder {
@@ -295,7 +294,6 @@ class ArrayStructBuilder {
     fbBuilder.putFloat32(a);
     return fbBuilder.offset;
   }
-
 }
 
 class ArrayStructObjectBuilder extends fb.ObjectBuilder {

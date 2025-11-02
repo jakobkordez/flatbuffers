@@ -278,7 +278,6 @@ class RapunzelBuilder {
     fbBuilder.putInt32(hairLength);
     return fbBuilder.offset;
   }
-
 }
 
 class RapunzelObjectBuilder extends fb.ObjectBuilder {
@@ -369,7 +368,6 @@ class BookReaderBuilder {
     fbBuilder.putInt32(booksRead);
     return fbBuilder.offset;
   }
-
 }
 
 class BookReaderObjectBuilder extends fb.ObjectBuilder {
@@ -460,7 +458,6 @@ class FallingTubBuilder {
     fbBuilder.putInt32(weight);
     return fbBuilder.offset;
   }
-
 }
 
 class FallingTubObjectBuilder extends fb.ObjectBuilder {
