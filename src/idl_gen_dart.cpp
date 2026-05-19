@@ -614,7 +614,8 @@ class DartGenerator : public BaseGenerator {
 
       const Type& type = field.value.type;
       std::string defaultValue = getDefaultValue(field.value);
-      bool isNullable = defaultValue.empty() && !struct_def.fixed;
+      bool isNullable =
+          defaultValue.empty() && !struct_def.fixed && !field.IsRequired();
       std::string nullableValueAccessOperator = isNullable ? "?" : "";
       if (type.base_type == BASE_TYPE_STRUCT ||
           type.base_type == BASE_TYPE_UNION) {
@@ -697,7 +698,7 @@ class DartGenerator : public BaseGenerator {
       const bool isNullable = defaultValue.empty() && !struct_def.fixed;
       const std::string type_name =
           GenDartTypeName(field.value.type, struct_def.defined_namespace, field,
-                          isNullable, "");
+                          isNullable && !field.IsRequired(), "");
 
       GenDocComment(field.doc_comment, "  ", code);
 
@@ -737,6 +738,7 @@ class DartGenerator : public BaseGenerator {
           std::string offset = NumToString(field.value.offset);
           if (isNullable) {
             code += "Nullable(_bc, _bcOffset, " + offset + ")";
+            if (field.IsRequired()) code += "!";
           } else {
             code += "(_bc, _bcOffset, " + offset + ", " + defaultValue + ")";
           }
@@ -1138,7 +1140,8 @@ class DartGenerator : public BaseGenerator {
         code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
                 NumToString(offset) + ", " + field_var;
         if (field.value.type.enum_def) {
-          bool isNullable = getDefaultValue(field.value).empty();
+          bool isNullable =
+              getDefaultValue(field.value).empty() && !field.IsRequired();
           code += (isNullable || !pack) ? "?.value" : ".value";
         }
         code += ");\n";
