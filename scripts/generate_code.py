@@ -445,6 +445,13 @@ flatc(RUST_OPTS, prefix="optional_scalars", schema=optional_scalars_schema)
 
 flatc(NO_INCL_OPTS + CPP_OPTS, schema=optional_scalars_schema)
 
+# Required non-scalar table fields
+required_fields_schema = "required_fields.fbs"
+flatc(
+    DART_OPTS + ["--gen-object-api"],
+    schema=required_fields_schema,
+)
+
 # Type / field collsion
 type_field_collsion_schema = "type_field_collsion.fbs"
 

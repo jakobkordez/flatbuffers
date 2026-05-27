@@ -1,0 +1,59 @@
+// Test schema for `(required)` on non-scalar table fields.
+//
+// FlatBuffers only allows `required` on non-scalar fields in tables (not on
+// scalars, and not on struct fields). This file exercises every non-scalar
+// category used in the IDL:
+//   - string
+//   - inline struct
+//   - nested table
+//   - union
+//   - vector (scalar, string, table, and enum elements)
+//
+// Use with language tests (e.g. Dart, Go, TS) to verify builders, accessors,
+// and verifiers handle required fields correctly.
+//
+// See also: required_strings.fbs (minimal string-only case).
+
+namespace required_fields;
+
+enum Kind : byte {
+  None = 0,
+  Alpha = 1,
+  Beta = 2,
+}
+
+struct InlineStruct {
+  x: float;
+  y: float;
+}
+
+table NestedTable {
+  label: string;
+}
+
+table UnionMemberA {
+  a: int;
+}
+
+table UnionMemberB {
+  b: string;
+}
+
+union Variant {
+  UnionMemberA,
+  UnionMemberB,
+}
+
+/// One table with every kind of required non-scalar field.
+table AllRequired {
+  req_string: string (required);
+  req_struct: InlineStruct (required);
+  req_table: NestedTable (required);
+  req_union: Variant (required);
+  req_ints: [int] (required);
+  req_strings: [string] (required);
+  req_tables: [NestedTable] (required);
+  req_enums: [Kind] (required);
+}
+
+root_type AllRequired;
