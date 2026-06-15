@@ -562,16 +562,19 @@ class DartGenerator : public BaseGenerator {
 
       const std::string field_name = namer_.Field(field);
       const std::string defaultValue = getDefaultValue(field.value);
+      const bool isRequired = !struct_def.fixed && field.IsRequired();
+      const bool isNullable =
+          defaultValue.empty() && !struct_def.fixed && !isRequired;
       const std::string type_name =
           GenDartTypeName(field.value.type, struct_def.defined_namespace, field,
-                          defaultValue.empty() && !struct_def.fixed, "T");
+                          isNullable, "T");
 
       GenDocComment(field.doc_comment, "  ", code);
       code += "  " + type_name + " " + field_name + ";\n";
 
       if (!constructor_args.empty()) constructor_args += ",\n";
       constructor_args += "      ";
-      constructor_args += (struct_def.fixed ? "required " : "");
+      constructor_args += (struct_def.fixed || isRequired ? "required " : "");
       constructor_args += "this." + field_name;
       if (!struct_def.fixed && !defaultValue.empty()) {
         if (IsEnum(field.value.type)) {
@@ -614,7 +617,9 @@ class DartGenerator : public BaseGenerator {
 
       const Type& type = field.value.type;
       std::string defaultValue = getDefaultValue(field.value);
-      bool isNullable = defaultValue.empty() && !struct_def.fixed;
+      const bool isRequired = !struct_def.fixed && field.IsRequired();
+      const bool isNullable =
+          defaultValue.empty() && !struct_def.fixed && !isRequired;
       std::string nullableValueAccessOperator = isNullable ? "?" : "";
       if (type.base_type == BASE_TYPE_STRUCT ||
           type.base_type == BASE_TYPE_UNION) {
@@ -675,7 +680,9 @@ class DartGenerator : public BaseGenerator {
 
       const std::string field_name = namer_.Field(field);
       const std::string defaultValue = getDefaultValue(field.value);
-      const bool isNullable = defaultValue.empty() && !struct_def.fixed;
+      const bool isRequired = !struct_def.fixed && field.IsRequired();
+      const bool isNullable =
+          defaultValue.empty() && !struct_def.fixed && !isRequired;
       const std::string type_name =
           GenDartTypeName(field.value.type, struct_def.defined_namespace, field,
                           isNullable, "");
@@ -716,8 +723,9 @@ class DartGenerator : public BaseGenerator {
         } else {
           code += ".vTableGet";
           std::string offset = NumToString(field.value.offset);
-          if (isNullable) {
+          if (isNullable || isRequired) {
             code += "Nullable(_bc, _bcOffset, " + offset + ")";
+            if (isRequired) code += "!";
           } else {
             code += "(_bc, _bcOffset, " + offset + ", " + defaultValue + ")";
           }
@@ -920,7 +928,28 @@ class DartGenerator : public BaseGenerator {
 
     code += "\n";
     code += "  int finish() {\n";
-    code += "    return fbBuilder.endTable();\n";
+    bool has_required = false;
+    for (auto it = non_deprecated_fields.begin();
+         it != non_deprecated_fields.end(); ++it) {
+      if (it->second->IsRequired()) {
+        has_required = true;
+        break;
+      }
+    }
+    if (has_required) {
+      code += "    final o = fbBuilder.endTable();\n";
+      for (auto it = non_deprecated_fields.begin();
+           it != non_deprecated_fields.end(); ++it) {
+        const FieldDef& field = *it->second;
+        if (field.IsRequired()) {
+          code += "    fbBuilder.required(o, " +
+                  NumToString(field.value.offset) + ");\n";
+        }
+      }
+      code += "    return o;\n";
+    } else {
+      code += "    return fbBuilder.endTable();\n";
+    }
     code += "  }\n";
   }
 
@@ -932,10 +961,11 @@ class DartGenerator : public BaseGenerator {
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
+      const bool isNullable = !struct_def.fixed && !field.IsRequired();
 
       code += "  final " +
               GenDartTypeName(field.value.type, struct_def.defined_namespace,
-                              field, !struct_def.fixed, "ObjectBuilder") +
+                              field, isNullable, "ObjectBuilder") +
               " _" + namer_.Variable(field) + ";\n";
     }
     code += "\n";
@@ -946,11 +976,13 @@ class DartGenerator : public BaseGenerator {
       for (auto it = non_deprecated_fields.begin();
            it != non_deprecated_fields.end(); ++it) {
         const FieldDef& field = *it->second;
+        const bool needsDartRequired = struct_def.fixed || field.IsRequired();
+        const bool isNullable = !struct_def.fixed && !field.IsRequired();
 
         code += "    ";
-        code += (struct_def.fixed ? "required " : "") +
+        code += (needsDartRequired ? "required " : "") +
                 GenDartTypeName(field.value.type, struct_def.defined_namespace,
-                                field, !struct_def.fixed, "ObjectBuilder") +
+                                field, isNullable, "ObjectBuilder") +
                 " " + namer_.Variable(field) + ",\n";
       }
       code += "  })\n";
@@ -992,63 +1024,69 @@ class DartGenerator : public BaseGenerator {
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields,
       bool prependUnderscore = true, bool pack = false) {
     std::string code;
-    for (auto it = non_deprecated_fields.begin();
-         it != non_deprecated_fields.end(); ++it) {
-      const FieldDef& field = *it->second;
+    for (const auto& nf : non_deprecated_fields) {
+      const FieldDef& field = *nf.second;
 
       if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type))
         continue;
 
-      std::string offset_name = namer_.Variable(field) + "Offset";
-      std::string field_name =
-          (prependUnderscore ? "_" : "") + namer_.Variable(field);
-      // custom handling for fixed-sized struct in pack()
+      const std::string var_name = namer_.Variable(field);
+      const std::string offset_name = var_name + "Offset";
+      const std::string field_name = (prependUnderscore ? "_" : "") + var_name;
+      const bool required = field.IsRequired();
+      const std::string nn =
+          required ? "" : "!";  // Dart non-null assert suffix
+
+      // Fixed-sized struct vectors in pack() require manual element iteration.
       if (pack && IsVector(field.value.type) &&
           field.value.type.VectorType().base_type == BASE_TYPE_STRUCT &&
           field.value.type.struct_def->fixed) {
         code += "    int? " + offset_name + ";\n";
-        code += "    if (" + field_name + " != null) {\n";
-        code += "      for (var e in " + field_name +
-                "!.reversed) { e.pack(fbBuilder); }\n";
-        code += "      " + namer_.Variable(field) +
-                "Offset = fbBuilder.endStructVector(" + field_name +
-                "!.length);\n";
-        code += "    }\n";
+        if (!required) code += "    if (" + field_name + " != null) {\n";
+        const std::string indent = required ? "    " : "      ";
+        code += indent + "for (var e in " + field_name + nn +
+                ".reversed) { e.pack(fbBuilder); }\n";
+        code += indent + offset_name + " = fbBuilder.endStructVector(" +
+                field_name + nn + ".length);\n";
+        if (!required) code += "    }\n";
         continue;
       }
 
-      code += "    final int? " + offset_name;
+      code += "    final int? " + offset_name + " = ";
+      const std::string pack_method =
+          std::string(pack ? "pack" : "getOrCreateOffset") + "(fbBuilder)";
       if (IsVector(field.value.type)) {
-        code += " = " + field_name + " == null ? null\n";
-        code += "        : fbBuilder.writeList";
+        // Emit the null-guard prefix for optional fields, then the writeList
+        // call.
+        if (!required) code += field_name + " == null ? null\n        : ";
+        code += "fbBuilder.writeList";
         switch (field.value.type.VectorType().base_type) {
           case BASE_TYPE_STRING:
-            code +=
-                "(" + field_name + "!.map(fbBuilder.writeString).toList());\n";
+            code += "(" + field_name + nn +
+                    ".map(fbBuilder.writeString).toList());\n";
             break;
           case BASE_TYPE_STRUCT:
             if (field.value.type.struct_def->fixed) {
-              code += "OfStructs(" + field_name + "!);\n";
+              code += "OfStructs(" + field_name + nn + ");\n";
             } else {
-              code += "(" + field_name + "!.map((b) => b." +
-                      (pack ? "pack" : "getOrCreateOffset") +
-                      "(fbBuilder)).toList());\n";
+              code += "(" + field_name + nn + ".map((b) => b." + pack_method +
+                      ").toList());\n";
             }
             break;
           default:
             code +=
-                GenType(field.value.type.VectorType()) + "(" + field_name + "!";
-            if (field.value.type.enum_def) {
+                GenType(field.value.type.VectorType()) + "(" + field_name + nn;
+            if (field.value.type.VectorType().enum_def) {
               code += ".map((f) => f.value).toList()";
             }
             code += ");\n";
         }
       } else if (IsString(field.value.type)) {
-        code += " = " + field_name + " == null ? null\n";
-        code += "        : fbBuilder.writeString(" + field_name + "!);\n";
+        if (!required) code += field_name + " == null ? null\n        : ";
+        code += "fbBuilder.writeString(" + field_name + nn + ");\n";
       } else {
-        code += " = " + field_name + "?." +
-                (pack ? "pack" : "getOrCreateOffset") + "(fbBuilder);\n";
+        const std::string safe_dot = required ? "." : "?.";
+        code += field_name + safe_dot + pack_method + ";\n";
       }
     }
 
@@ -1119,15 +1157,27 @@ class DartGenerator : public BaseGenerator {
         code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
                 NumToString(offset) + ", " + field_var;
         if (field.value.type.enum_def) {
-          bool isNullable = getDefaultValue(field.value).empty();
-          code += (isNullable || !pack) ? "?.value" : ".value";
+          // Match nullability of the Dart field in this code path:
+          // ObjectBuilder members are nullable for all optional table fields;
+          // *T.pack() uses non-null types when the schema has a default value.
+          const bool dartFieldIsNullable =
+              prependUnderscore ? (!struct_def.fixed && !field.IsRequired())
+                                : (getDefaultValue(field.value).empty() &&
+                                   !struct_def.fixed && !field.IsRequired());
+          code += dartFieldIsNullable ? "?.value" : ".value";
         }
         code += ");\n";
       } else if (IsStruct(field.value.type)) {
-        code += "    if (" + field_var + " != null) {\n";
-        code += "      fbBuilder.addStruct(" + NumToString(offset) + ", " +
-                field_var + (pack ? "!.pack" : "!.finish") + "(fbBuilder));\n";
-        code += "    }\n";
+        if (field.IsRequired()) {
+          code += "    fbBuilder.addStruct(" + NumToString(offset) + ", " +
+                  field_var + (pack ? ".pack" : ".finish") + "(fbBuilder));\n";
+        } else {
+          code += "    if (" + field_var + " != null) {\n";
+          code += "      fbBuilder.addStruct(" + NumToString(offset) + ", " +
+                  field_var + (pack ? "!.pack" : "!.finish") +
+                  "(fbBuilder));\n";
+          code += "    }\n";
+        }
       } else {
         code += "    fbBuilder.addOffset(" + NumToString(offset) + ", " +
                 namer_.Variable(field) + "Offset);\n";

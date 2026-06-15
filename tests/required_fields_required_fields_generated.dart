@@ -493,9 +493,9 @@ class AllRequired {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  String? get reqString => const fb.StringReader().vTableGetNullable(_bc, _bcOffset, 4);
-  InlineStruct? get reqStruct => InlineStruct.reader.vTableGetNullable(_bc, _bcOffset, 6);
-  NestedTable? get reqTable => NestedTable.reader.vTableGetNullable(_bc, _bcOffset, 8);
+  String get reqString => const fb.StringReader().vTableGetNullable(_bc, _bcOffset, 4)!;
+  InlineStruct get reqStruct => InlineStruct.reader.vTableGetNullable(_bc, _bcOffset, 6)!;
+  NestedTable get reqTable => NestedTable.reader.vTableGetNullable(_bc, _bcOffset, 8)!;
   VariantTypeId? get reqUnionType => VariantTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 10));
   dynamic get reqUnion {
     switch (reqUnionType?.value) {
@@ -504,10 +504,10 @@ class AllRequired {
       default: return null;
     }
   }
-  List<int>? get reqInts => const fb.ListReader<int>(fb.Int32Reader()).vTableGetNullable(_bc, _bcOffset, 14);
-  List<String>? get reqStrings => const fb.ListReader<String>(fb.StringReader()).vTableGetNullable(_bc, _bcOffset, 16);
-  List<NestedTable>? get reqTables => const fb.ListReader<NestedTable>(NestedTable.reader).vTableGetNullable(_bc, _bcOffset, 18);
-  List<Kind>? get reqEnums => const fb.ListReader<Kind>(Kind.reader).vTableGetNullable(_bc, _bcOffset, 20);
+  List<int> get reqInts => const fb.ListReader<int>(fb.Int32Reader()).vTableGetNullable(_bc, _bcOffset, 14)!;
+  List<String> get reqStrings => const fb.ListReader<String>(fb.StringReader()).vTableGetNullable(_bc, _bcOffset, 16)!;
+  List<NestedTable> get reqTables => const fb.ListReader<NestedTable>(NestedTable.reader).vTableGetNullable(_bc, _bcOffset, 18)!;
+  List<Kind> get reqEnums => const fb.ListReader<Kind>(Kind.reader).vTableGetNullable(_bc, _bcOffset, 20)!;
 
   @override
   String toString() {
@@ -516,14 +516,14 @@ class AllRequired {
 
   AllRequiredT unpack() => AllRequiredT(
       reqString: reqString,
-      reqStruct: reqStruct?.unpack(),
-      reqTable: reqTable?.unpack(),
+      reqStruct: reqStruct.unpack(),
+      reqTable: reqTable.unpack(),
       reqUnionType: reqUnionType,
-      reqUnion: reqUnion?.unpack(),
-      reqInts: reqInts?.toList(),
-      reqStrings: reqStrings?.toList(),
-      reqTables: reqTables?.map((e) => e.unpack()).toList(),
-      reqEnums: reqEnums?.toList());
+      reqUnion: reqUnion.unpack(),
+      reqInts: reqInts.toList(),
+      reqStrings: reqStrings.toList(),
+      reqTables: reqTables.map((e) => e.unpack()).toList(),
+      reqEnums: reqEnums.toList());
 
   static int pack(fb.Builder fbBuilder, AllRequiredT? object) {
     if (object == null) return 0;
@@ -533,46 +533,39 @@ class AllRequired {
 
 ///  One table with every kind of required non-scalar field.
 class AllRequiredT implements fb.Packable {
-  String? reqString;
-  InlineStructT? reqStruct;
-  NestedTableT? reqTable;
+  String reqString;
+  InlineStructT reqStruct;
+  NestedTableT reqTable;
   VariantTypeId? reqUnionType;
   dynamic reqUnion;
-  List<int>? reqInts;
-  List<String>? reqStrings;
-  List<NestedTableT>? reqTables;
-  List<Kind>? reqEnums;
+  List<int> reqInts;
+  List<String> reqStrings;
+  List<NestedTableT> reqTables;
+  List<Kind> reqEnums;
 
   AllRequiredT({
-      this.reqString,
-      this.reqStruct,
-      this.reqTable,
+      required this.reqString,
+      required this.reqStruct,
+      required this.reqTable,
       this.reqUnionType,
-      this.reqUnion,
-      this.reqInts,
-      this.reqStrings,
-      this.reqTables,
-      this.reqEnums});
+      required this.reqUnion,
+      required this.reqInts,
+      required this.reqStrings,
+      required this.reqTables,
+      required this.reqEnums});
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? reqStringOffset = reqString == null ? null
-        : fbBuilder.writeString(reqString!);
-    final int? reqTableOffset = reqTable?.pack(fbBuilder);
-    final int? reqUnionOffset = reqUnion?.pack(fbBuilder);
-    final int? reqIntsOffset = reqInts == null ? null
-        : fbBuilder.writeListInt32(reqInts!);
-    final int? reqStringsOffset = reqStrings == null ? null
-        : fbBuilder.writeList(reqStrings!.map(fbBuilder.writeString).toList());
-    final int? reqTablesOffset = reqTables == null ? null
-        : fbBuilder.writeList(reqTables!.map((b) => b.pack(fbBuilder)).toList());
-    final int? reqEnumsOffset = reqEnums == null ? null
-        : fbBuilder.writeListInt8(reqEnums!.map((f) => f.value).toList());
+    final int? reqStringOffset = fbBuilder.writeString(reqString);
+    final int? reqTableOffset = reqTable.pack(fbBuilder);
+    final int? reqUnionOffset = reqUnion.pack(fbBuilder);
+    final int? reqIntsOffset = fbBuilder.writeListInt32(reqInts);
+    final int? reqStringsOffset = fbBuilder.writeList(reqStrings.map(fbBuilder.writeString).toList());
+    final int? reqTablesOffset = fbBuilder.writeList(reqTables.map((b) => b.pack(fbBuilder)).toList());
+    final int? reqEnumsOffset = fbBuilder.writeListInt8(reqEnums.map((f) => f.value).toList());
     fbBuilder.startTable(9);
     fbBuilder.addOffset(0, reqStringOffset);
-    if (reqStruct != null) {
-      fbBuilder.addStruct(1, reqStruct!.pack(fbBuilder));
-    }
+    fbBuilder.addStruct(1, reqStruct.pack(fbBuilder));
     fbBuilder.addOffset(2, reqTableOffset);
     fbBuilder.addUint8(3, reqUnionType?.value);
     fbBuilder.addOffset(4, reqUnionOffset);
@@ -644,31 +637,40 @@ class AllRequiredBuilder {
   }
 
   int finish() {
-    return fbBuilder.endTable();
+    final o = fbBuilder.endTable();
+    fbBuilder.required(o, 4);
+    fbBuilder.required(o, 6);
+    fbBuilder.required(o, 8);
+    fbBuilder.required(o, 12);
+    fbBuilder.required(o, 14);
+    fbBuilder.required(o, 16);
+    fbBuilder.required(o, 18);
+    fbBuilder.required(o, 20);
+    return o;
   }
 }
 
 class AllRequiredObjectBuilder extends fb.ObjectBuilder {
-  final String? _reqString;
-  final InlineStructObjectBuilder? _reqStruct;
-  final NestedTableObjectBuilder? _reqTable;
+  final String _reqString;
+  final InlineStructObjectBuilder _reqStruct;
+  final NestedTableObjectBuilder _reqTable;
   final VariantTypeId? _reqUnionType;
   final dynamic _reqUnion;
-  final List<int>? _reqInts;
-  final List<String>? _reqStrings;
-  final List<NestedTableObjectBuilder>? _reqTables;
-  final List<Kind>? _reqEnums;
+  final List<int> _reqInts;
+  final List<String> _reqStrings;
+  final List<NestedTableObjectBuilder> _reqTables;
+  final List<Kind> _reqEnums;
 
   AllRequiredObjectBuilder({
-    String? reqString,
-    InlineStructObjectBuilder? reqStruct,
-    NestedTableObjectBuilder? reqTable,
+    required String reqString,
+    required InlineStructObjectBuilder reqStruct,
+    required NestedTableObjectBuilder reqTable,
     VariantTypeId? reqUnionType,
-    dynamic reqUnion,
-    List<int>? reqInts,
-    List<String>? reqStrings,
-    List<NestedTableObjectBuilder>? reqTables,
-    List<Kind>? reqEnums,
+    required dynamic reqUnion,
+    required List<int> reqInts,
+    required List<String> reqStrings,
+    required List<NestedTableObjectBuilder> reqTables,
+    required List<Kind> reqEnums,
   })
       : _reqString = reqString,
         _reqStruct = reqStruct,
@@ -683,23 +685,16 @@ class AllRequiredObjectBuilder extends fb.ObjectBuilder {
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? reqStringOffset = _reqString == null ? null
-        : fbBuilder.writeString(_reqString!);
-    final int? reqTableOffset = _reqTable?.getOrCreateOffset(fbBuilder);
-    final int? reqUnionOffset = _reqUnion?.getOrCreateOffset(fbBuilder);
-    final int? reqIntsOffset = _reqInts == null ? null
-        : fbBuilder.writeListInt32(_reqInts!);
-    final int? reqStringsOffset = _reqStrings == null ? null
-        : fbBuilder.writeList(_reqStrings!.map(fbBuilder.writeString).toList());
-    final int? reqTablesOffset = _reqTables == null ? null
-        : fbBuilder.writeList(_reqTables!.map((b) => b.getOrCreateOffset(fbBuilder)).toList());
-    final int? reqEnumsOffset = _reqEnums == null ? null
-        : fbBuilder.writeListInt8(_reqEnums!.map((f) => f.value).toList());
+    final int? reqStringOffset = fbBuilder.writeString(_reqString);
+    final int? reqTableOffset = _reqTable.getOrCreateOffset(fbBuilder);
+    final int? reqUnionOffset = _reqUnion.getOrCreateOffset(fbBuilder);
+    final int? reqIntsOffset = fbBuilder.writeListInt32(_reqInts);
+    final int? reqStringsOffset = fbBuilder.writeList(_reqStrings.map(fbBuilder.writeString).toList());
+    final int? reqTablesOffset = fbBuilder.writeList(_reqTables.map((b) => b.getOrCreateOffset(fbBuilder)).toList());
+    final int? reqEnumsOffset = fbBuilder.writeListInt8(_reqEnums.map((f) => f.value).toList());
     fbBuilder.startTable(9);
     fbBuilder.addOffset(0, reqStringOffset);
-    if (_reqStruct != null) {
-      fbBuilder.addStruct(1, _reqStruct!.finish(fbBuilder));
-    }
+    fbBuilder.addStruct(1, _reqStruct.finish(fbBuilder));
     fbBuilder.addOffset(2, reqTableOffset);
     fbBuilder.addUint8(3, _reqUnionType?.value);
     fbBuilder.addOffset(4, reqUnionOffset);

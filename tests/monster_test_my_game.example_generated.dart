@@ -1118,7 +1118,7 @@ class Monster {
   Vec3? get pos => Vec3.reader.vTableGetNullable(_bc, _bcOffset, 4);
   int get mana => const fb.Int16Reader().vTableGet(_bc, _bcOffset, 6, 150);
   int get hp => const fb.Int16Reader().vTableGet(_bc, _bcOffset, 8, 100);
-  String? get name => const fb.StringReader().vTableGetNullable(_bc, _bcOffset, 10);
+  String get name => const fb.StringReader().vTableGetNullable(_bc, _bcOffset, 10)!;
   List<int>? get inventory => const fb.Uint8ListReader().vTableGetNullable(_bc, _bcOffset, 14);
   Color get color => Color.fromValue(const fb.Uint8Reader().vTableGet(_bc, _bcOffset, 16, 8));
   AnyTypeId? get testType => AnyTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 18));
@@ -1279,7 +1279,7 @@ class MonsterT implements fb.Packable {
   Vec3T? pos;
   int mana;
   int hp;
-  String? name;
+  String name;
   List<int>? inventory;
   Color color;
   AnyTypeId? testType;
@@ -1344,7 +1344,7 @@ class MonsterT implements fb.Packable {
       this.pos,
       this.mana = 150,
       this.hp = 100,
-      this.name,
+      required this.name,
       this.inventory,
       this.color = Color.Blue,
       this.testType,
@@ -1405,8 +1405,7 @@ class MonsterT implements fb.Packable {
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? nameOffset = name == null ? null
-        : fbBuilder.writeString(name!);
+    final int? nameOffset = fbBuilder.writeString(name);
     final int? inventoryOffset = inventory == null ? null
         : fbBuilder.writeListUint8(inventory!);
     final int? testOffset = test?.pack(fbBuilder);
@@ -1800,7 +1799,9 @@ class MonsterBuilder {
   }
 
   int finish() {
-    return fbBuilder.endTable();
+    final o = fbBuilder.endTable();
+    fbBuilder.required(o, 10);
+    return o;
   }
 }
 
@@ -1808,7 +1809,7 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
   final Vec3ObjectBuilder? _pos;
   final int? _mana;
   final int? _hp;
-  final String? _name;
+  final String _name;
   final List<int>? _inventory;
   final Color? _color;
   final AnyTypeId? _testType;
@@ -1871,7 +1872,7 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     Vec3ObjectBuilder? pos,
     int? mana,
     int? hp,
-    String? name,
+    required String name,
     List<int>? inventory,
     Color? color,
     AnyTypeId? testType,
@@ -1995,8 +1996,7 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? nameOffset = _name == null ? null
-        : fbBuilder.writeString(_name!);
+    final int? nameOffset = fbBuilder.writeString(_name);
     final int? inventoryOffset = _inventory == null ? null
         : fbBuilder.writeListUint8(_inventory!);
     final int? testOffset = _test?.getOrCreateOffset(fbBuilder);

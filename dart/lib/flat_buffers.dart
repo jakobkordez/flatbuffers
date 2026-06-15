@@ -346,6 +346,22 @@ class Builder {
     return tableTail;
   }
 
+  /// Verify that a required table field is present.
+  ///
+  /// [table] is the offset returned by [endTable]. [vTableField] is the byte
+  /// offset of the field in the vtable (e.g. `4 + 2 * fieldIndex`), matching
+  /// what generated table readers pass to `vTableGet*`.
+  ///
+  /// Throws a [StateError] if the field is missing.
+  void required(int table, int vTableField) {
+    final tableStart = _buf.lengthInBytes - table;
+    final vTableStart = tableStart - _buf.getInt32(tableStart, Endian.little);
+    final ok = _buf.getInt16(vTableStart + vTableField, Endian.little) != 0;
+    if (!ok) {
+      throw StateError('FlatBuffers: field $vTableField must be set');
+    }
+  }
+
   /// Returns the finished buffer. You must call [finish] before accessing this.
   @pragma('vm:prefer-inline')
   Uint8List get buffer {
